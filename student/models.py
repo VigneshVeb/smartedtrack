@@ -29,3 +29,17 @@ class ParentStudent(models.Model):
 
     def __str__(self):
         return f"{self.parent.username} - {self.student.user.username}"
+class Attendance(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    date = models.DateField()
+    status = models.CharField(
+        max_length=10,
+        choices=[('present', 'Present'), ('absent', 'Absent')]
+    )
+    marked_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="marked_attendance"
+    )
+
+    def __str__(self):
+        return f"{self.student.user.first_name} - {self.date} - {self.status}"

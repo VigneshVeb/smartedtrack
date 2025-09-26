@@ -85,3 +85,11 @@ class StandardSerializer(serializers.ModelSerializer):
     class Meta:
         model=Standard
         fields=['id','standardname','sections']
+class AttendanceSerializer(serializers.ModelSerializer):
+    student_id=serializers.IntegerField()
+    date=serializers.DateField()
+    status=serializers.ChoiceField(choices=[('present', 'Present'), ('absent', 'Absent')])
+    class Meta:
+        model=Attendance
+        fields=['id','student_id','date','status']  
+  
