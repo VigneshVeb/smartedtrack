@@ -1,70 +1,60 @@
-import React, { useEffect, useState } from "react";
-import apiClient from "../api/apiClient";
+import React, { useState } from "react";
+import apiClient from "../utils/apiClient";
+import { useAuth } from "../context/AuthProvider";
 
-interface Student {
-  id: number;
-  name: string;
-}
+const AttendancePage: React.FC = () => {
+  const { user } = useAuth();
+  const [studentId, setStudentId] = useState("");
+  const [date, setDate] = useState("");
+  const [status, setStatus] = useState("present");
+  const [message, setMessage] = useState("");
 
-const Attendance: React.FC = () => {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [attendance, setAttendance] = useState<Record<number, string>>({});
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage("");
 
-  useEffect(() => {
-    apiClient.get("/students/").then((res) => setStudents(res.data));
-  }, []);
+    try {
+      const res = await apiClient.post(
+        "/students/mark-attendance/",
+        {
+          student_id: studentId,
+          date: date,
+          status: status,
+        }
+      );
 
-  const handleMark = (id: number, status: string) => {
-    setAttendance({ ...attendance, [id]: status });
-  };
-
-  const handleSubmit = async () => {
-    const payload = Object.entries(attendance).map(([student_id, status]) => ({
-      student_id,
-      status,
-      date: new Date().toISOString().split("T")[0],
-    }));
-
-    await apiClient.post("/students/mark-attendance/", payload);
-    alert("Attendance submitted!");
+      setMessage("✅ Attendance marked successfully!");
+    } catch (err: any) {
+      console.error(err);
+      setMessage("❌ Failed to mark attendance.");
+    }
   };
 
   return (
     <div>
-      <h2>Attendance</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Student</th>
-            <th>Present</th>
-            <th>Absent</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.map((s) => (
-            <tr key={s.id}>
-              <td>{s.name}</td>
-              <td>
-                <input
-                  type="radio"
-                  name={`att_${s.id}`}
-                  onChange={() => handleMark(s.id, "present")}
-                />
-              </td>
-              <td>
-                <input
-                  type="radio"
-                  name={`att_${s.id}`}
-                  onChange={() => handleMark(s.id, "absent")}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button onClick={handleSubmit}>Submit Attendance</button>
+      <h1>Attendance</h1>
+      <p>Logged in as: {user?.username}</p>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Student ID"
+          value={studentId}
+          onChange={(e) => setStudentId(e.target.value)}
+        />
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+        <select value={status} onChange={(e) => setStatus(e.target.value)}>
+          <option value="present">Present</option>
+          <option value="absent">Absent</option>
+        </select>
+        <button type="submit">Mark Attendance</button>
+      </form>
+      {message && <p>{message}</p>}
     </div>
   );
 };
 
-export default Attendance;
+export default AttendancePage;

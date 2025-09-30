@@ -1,29 +1,44 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthProvider";
+import apiClient from "../utils/apiClient";
+import { useAuth } from "../context/AuthProvider";
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const auth = useContext(AuthContext);
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+
     try {
-      await auth?.login(username, password);
-      navigate("/attendance");
-    } catch {
+      const response = await apiClient.post(
+        "/accounts/login/",
+        { username, password },
+        { withCredentials: true }
+      );
+
+      if (response.data.user) {
+        // ✅ Save user in context + localStorage
+        setUser(response.data.user);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+
+        navigate("/attendance"); // redirect after login
+      } else {
+        setError("Invalid credentials");
+      }
+    } catch (err: any) {
       setError("Invalid credentials");
     }
   };
 
   return (
-    <div className="login-container">
+    <div>
+      <h1>Login</h1>
       <form onSubmit={handleSubmit}>
-        <h2>Login</h2>
-        {error && <p style={{ color: "red" }}>{error}</p>}
         <input
           type="text"
           placeholder="Username"
@@ -38,6 +53,7 @@ const Login: React.FC = () => {
         />
         <button type="submit">Login</button>
       </form>
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 };

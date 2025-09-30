@@ -1,28 +1,31 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route,Navigate} from "react-router-dom";
-import { AuthProvider } from "./context/AuthProvider";
-import ProtectedRoute from "./routes/ProtectedRoute";
+import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import Login from "./pages/Login";
-import Attendance from "./pages/Attendance";
+import AttendancePage from "./pages/Attendance";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/attendance"
-            element={
-              <ProtectedRoute>
-                <Attendance />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <Routes>
+        {/* Public route */}
+   
+        <Route path="/login" element={<Login />} />
+
+        {/* Protected routes */}
+        <Route
+          path="/attendance"
+          element={
+            <ProtectedRoute>
+              <AttendancePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Default redirect */}
+        <Route path="*" element={<Login />} />
+      </Routes>
+    </Router>
   );
 };
 
