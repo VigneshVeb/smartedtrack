@@ -63,19 +63,20 @@ class LinkParentSerializer(serializers.ModelSerializer):
         )
         return link
     def to_representation(self, instance):
-        return {
-            'id': instance.id,
-            'parent': {
-                'id': instance.parent.id,
-                'name': instance.parent.name,
-                'email': instance.parent.email,
-            },
-            'student': {
-                'id': instance.student.id,
-                'name': instance.student.user.name,
-                'email': instance.student.user.email,
-            }
+        
+            return {
+        'id': instance.id,
+        'parent': {
+            'id': instance.parent.id,
+            'name': f"{instance.parent.first_name} {instance.parent.last_name}",  # ✅
+            'email': instance.parent.email,
+        },
+        'student': {
+            'id': instance.student.id,
+            'name': f"{instance.student.user.first_name} {instance.student.user.last_name}",  # ✅
+            'email': instance.student.user.email,
         }
+    }
 class SectionSerializer(serializers.ModelSerializer):
     class Meta:
         model=Section
@@ -91,5 +92,20 @@ class AttendanceSerializer(serializers.ModelSerializer):
     status=serializers.ChoiceField(choices=[('present', 'Present'), ('absent', 'Absent')])
     class Meta:
         model=Attendance
-        fields=['id','student_id','date','status']  
+        fields=['id','student_id','date','status'] 
+class AttendanceDailySerializer(serializers.ModelSerializer):
+      student_name=serializers.CharField(read_only=True)
+      standard=serializers.CharField(read_only=True)
+      section=serializers.CharField(read_only=True)
+      class Meta:
+            model=Attendance
+            fields=['id','student_name','standard','section','date','status']
+class AttendanceSummarySerializer(serializers.Serializer):
   
+    student_name=serializers.CharField()
+    standard=serializers.CharField()
+    section=serializers.CharField()
+    present_days=serializers.IntegerField()
+    absent_days=serializers.IntegerField()
+    attendance_percentage=serializers.FloatField()
+     

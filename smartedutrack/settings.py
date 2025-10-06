@@ -42,19 +42,31 @@ INSTALLED_APPS = [
     'parent',
     'student',
     'teacher',
+    "corsheaders",
     
 
     ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+
+    # CORS must be placed at the top (before CommonMiddleware)
+    "corsheaders.middleware.CorsMiddleware",
+
+    "django.middleware.common.CommonMiddleware",
+
+    # Session and Authentication middlewares
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+
+    # CSRF protection
+    "django.middleware.csrf.CsrfViewMiddleware",
+
+    # Other essentials
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
 
 ROOT_URLCONF = 'smartedutrack.urls'
 temp=BASE_DIR/"templates"
@@ -137,3 +149,21 @@ STATICFILES_DIRS=[BASE_DIR/'static']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL='accounts.User' #custom user model
+CORS_ALLOW_CREDENTIALS = True
+
+
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+     "http://localhost:3000",
+      "http://127.0.0.1:5173",
+     
+]
+CORS_ALLOW_ALL_ORIGINS = True
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+}

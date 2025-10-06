@@ -14,6 +14,8 @@ from django.utils.encoding import force_bytes, force_str
 from .serializers import passwordresetSerializer,PasswordResetConfirmationSerializer
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import AllowAny
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
 # Create your views here.
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
@@ -37,15 +39,22 @@ class SessionLoginView(APIView):
         if serializer.is_valid():
             user = serializer.validated_data
             login(request, user)
-            return Response({
+
+            # ✅ Generate and attach CSRF token to the response
+            csrf_token = get_token(request)
+            response = JsonResponse({
                 "message": "Login successful",
                 "user": {
                     "id": user.id,
                     "username": user.username,
                     "email": user.email,
                     "role": user.role
-                }
-            }, status=status.HTTP_200_OK)
+                },
+                "csrfToken": csrf_token,  # optional, also send it in JSON for debugging
+            })
+            response.set_cookie("csrftoken", csrf_token, httponly=False, samesite='Lax')
+            return response
+
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 

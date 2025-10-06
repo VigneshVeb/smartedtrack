@@ -9,7 +9,7 @@ urlpatterns = [
  path("attendance/student/<int:student_id>/",StudentAttendanceView.as_view(), name="student-attendance"),
  path("attendance/class/<int:section_id>/",ClassAttendanceView.as_view(), name="create-attendance-for-class"),
  path("attendance/report/", AttendanceReportPrincipleView.as_view(), name="attendance-report"),
- path("attendance/teacher/<int:teacher_id>/",AttendanceReportParentView.as_view(), name="teacher-attendance"),
+ path("attendance/parent/", AttendanceReportParentView.as_view(), name="parent-attendance"),
 
 ]
 
